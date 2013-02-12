@@ -27,6 +27,8 @@ source=("https://dl-web.dropbox.com/u/17/${pkgname}-lnx.${_source_arch}-${pkgver
         "dropbox.desktop"
         "terms.txt"
         "dropbox.service")
+_patches=(dropboxd.diff)
+source=(${source[@]} ${_patches[@]})
 
 build() {
 	install -d "$pkgdir/opt"
@@ -36,7 +38,16 @@ build() {
 	chmod 755 "$pkgdir/opt/dropbox/dropboxd"
 	chmod 755 "$pkgdir/opt/dropbox/dropbox"
 
+
 	install -d "$pkgdir/usr/bin"
+
+	cd $pkgdir/usr/bin
+	for p in "${_patches[@]}"; do
+      echo "=> $p"
+      patch < $srcdir/$p || return 1
+    done 
+	cd $srcdir
+
 	ln -s "/opt/dropbox/dropboxd" "$pkgdir/usr/bin/dropboxd"
 
 	install -Dm644 "$srcdir/dropbox.desktop" "$pkgdir/usr/share/applications/dropbox.desktop"
