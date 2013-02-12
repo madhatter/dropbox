@@ -41,7 +41,7 @@ build() {
 
 	install -d "$pkgdir/usr/bin"
 
-	cd $pkgdir/usr/opt/dropbox
+	cd $pkgdir/opt/dropbox
 	for p in "${_patches[@]}"; do
       echo "=> $p"
       patch < $srcdir/$p || return 1
