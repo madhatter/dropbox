@@ -41,14 +41,14 @@ build() {
 
 	install -d "$pkgdir/usr/bin"
 
-	cd $pkgdir/usr/bin
+	cd $pkgdir/usr/opt/dropbox
 	for p in "${_patches[@]}"; do
       echo "=> $p"
       patch < $srcdir/$p || return 1
     done 
 	cd $srcdir
 
-	ln -s "/opt/dropbox/dropboxd" "$pkgdir/usr/bin/dropboxd"
+	ln -s "$pkgdir/opt/dropbox/dropboxd" "$pkgdir/usr/bin/dropboxd"
 
 	install -Dm644 "$srcdir/dropbox.desktop" "$pkgdir/usr/share/applications/dropbox.desktop"
 	install -Dm644 "$srcdir/dropbox.png" "$pkgdir/usr/share/pixmaps/dropbox.png"

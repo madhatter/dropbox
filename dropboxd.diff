@@ -1,46 +1,47 @@
-1,3c1
-< #!/bin/sh
-< 
-< # Copyright 2008 Evenflow, Inc., 2010 Dropbox
----
-> #copyright 2008 Evenflow, Inc., 2010 Dropbox
-6a5
-> start_dropbox() {
-9,10c8,41
-< LD_LIBRARY_PATH=$PAR${LD_LIBRARY_PATH:+:}$LD_LIBRARY_PATH
-< exec $PAR/dropbox $@
----
-> LD_LIBRARY_PATH=$PAR:$LD_LIBRARY_PATH
-> 
-> TMP1=`ps ax|grep dropbox|grep -v grep`
-> if [ -n "$TMP1" ]; then
->   kill -9 $(pidof dropbox) >/dev/null 2>&1
-> fi
-> exec $PAR/dropbox $@ &
-> }
-> 
-> do_dropbox() {
-> start_dropbox >/dev/null 2>&1
-> while [ 1 ]; do
->   sleep 5
->   ERROR="$(net_test)"
->   if [ -n "$ERROR" ]; then
->     LAST_ERROR=1
->   else
->     if [ -n "$LAST_ERROR" ]; then
->       # Connection seems to be up but last cycle was down
->       LAST_ERROR=""
->       start_dropbox >/dev/null 2>&1
->     fi
->   fi
-> done
-> 
-> }
-> 
-> net_test() {
-> TMP1="$(ip addr |grep "inet " |grep -v "127.0.0.1")"
-> [ -z "$TMP1" ] && echo "error"
-> }
-> 
-> do_dropbox
-> 
+diff --git a/pkg/opt/dropbox/dropboxd b/pkg/opt/dropbox/dropboxd
+index 48beaf3..353f63e 100755
+--- a/pkg/opt/dropbox/dropboxd
++++ b/pkg/opt/dropbox/dropboxd
+@@ -4,7 +4,40 @@
+ #
+ # Environment script for the dropbox executable.
+ 
++start_dropbox() {
+ PAR=$(dirname $(readlink -f $0))
+ OLD_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+-LD_LIBRARY_PATH=$PAR${LD_LIBRARY_PATH:+:}$LD_LIBRARY_PATH
+-exec $PAR/dropbox $@
++LD_LIBRARY_PATH=$PAR:$LD_LIBRARY_PATH
++
++TMP1=`ps ax|grep dropbox|grep -v grep`
++if [ -n "$TMP1" ]; then
++  kill -9 $(pidof dropbox) >/dev/null 2>&1
++fi
++exec $PAR/dropbox $@ &
++}
++
++do_dropbox() {
++start_dropbox >/dev/null 2>&1
++while [ 1 ]; do
++  sleep 5
++  ERROR="$(net_test)"
++  if [ -n "$ERROR" ]; then
++    LAST_ERROR=1
++  else
++    if [ -n "$LAST_ERROR" ]; then
++      # Connection seems to be up but last cycle was down
++      LAST_ERROR=""
++      start_dropbox >/dev/null 2>&1
++    fi
++  fi
++done
++
++}
++
++net_test() {
++TMP1="$(ip addr |grep "inet " |grep -v "127.0.0.1")"
++[ -z "$TMP1" ] && echo "error"
++}
++
++do_dropbox
++
